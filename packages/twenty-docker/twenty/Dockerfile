@@ -112,7 +112,7 @@ RUN apk add --no-cache \
     'jq>=1.8.2-r0'
 
 COPY ./packages/twenty-docker/twenty/entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
+RUN chmod 755 /app/entrypoint.sh
 WORKDIR /app/packages/twenty-server
 
 ARG APP_VERSION
