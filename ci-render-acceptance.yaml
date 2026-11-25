@@ -1,0 +1,53 @@
+# Private synthetic testing only. Not a commercially cleared Twenty distribution.
+services:
+  - type: pserv
+    name: ci-native-twenty-acceptance
+    runtime: docker
+    region: frankfurt
+    plan: standard
+    branch: infra/ci-native-acceptance-20261125
+    autoDeployTrigger: off
+    dockerfilePath: ./packages/twenty-docker/twenty/Dockerfile.ci-acceptance
+    dockerContext: .
+    disk:
+      name: ci-twenty-data
+      mountPath: /app/packages/twenty-server/.local-storage
+      sizeGB: 5
+    envVars:
+      - key: PORT
+        value: "10000"
+      - key: CI_TWENTY_HOSTPORT
+        fromService:
+          name: ci-native-twenty-acceptance
+          type: pserv
+          property: hostport
+      - key: PG_DATABASE_URL
+        fromDatabase:
+          name: ci-twenty-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: ci-twenty-cache
+          type: keyvalue
+          property: connectionString
+      - key: APP_SECRET
+        generateValue: true
+      - key: IS_BILLING_ENABLED
+        value: "false"
+      - key: SIGN_IN_PREFILLED
+        value: "false"
+      - key: STORAGE_TYPE
+        value: local
+  - type: keyvalue
+    name: ci-twenty-cache
+    region: frankfurt
+    plan: starter
+    ipAllowList: []
+    maxmemoryPolicy: noeviction
+databases:
+  - name: ci-twenty-db
+    region: frankfurt
+    plan: basic_1gb
+    postgresMajorVersion: "16"
+    databaseName: ci_twenty
+    ipAllowList: []
